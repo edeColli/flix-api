@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework import serializers
 from movies.models import Movie
 from genres.models import Genre
@@ -23,17 +24,11 @@ class MovieModelSerializer(serializers.ModelSerializer):
 
 
     #esse metodo precisa ter get_ como prefixo para poder implementar o campo de serliazerMethodField, pois esse é um campo calculado
-    def get_rate(self, obj):        
-        reviews = obj.reviews.filter()
-        if reviews:
-            i = 0
-            media = 0
-            for rate in reviews:
-                media += rate.stars
-                i = i+1
-            return media / i
-        return None
-    
+    def get_rate(self, obj):
+        rate = obj.reviews.aggregate(Avg('stars'))['stars__avg']
+        if rate:
+            return round(rate,1)
+
 
     #Validação de campos sempre começam com validate_[nome do campo]
     #pode ter mais de uma validação por campo, pois retorna uma lista de validações
