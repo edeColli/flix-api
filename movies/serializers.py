@@ -23,14 +23,16 @@ class MovieModelSerializer(serializers.ModelSerializer):
 
 
     #esse metodo precisa ter get_ como prefixo para poder implementar o campo de serliazerMethodField, pois esse é um campo calculado
-    def get_rate(self, obj):
-        i = 0
-        media = 0
+    def get_rate(self, obj):        
         reviews = obj.reviews.filter()
-        for rate in reviews:
-            media = media + rate.stars
-            i = i+1
-        return media / i
+        if reviews:
+            i = 0
+            media = 0
+            for rate in reviews:
+                media += rate.stars
+                i = i+1
+            return media / i
+        return None
     
 
     #Validação de campos sempre começam com validate_[nome do campo]
