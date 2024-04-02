@@ -8,22 +8,22 @@ from app.permissions import GlobalDefaultPermissionClass
 
 
 class MovieCreateListView(generics.ListCreateAPIView):
-    #permission_classes = (IsAuthenticated, GlobalDefaultPermissionClass,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissionClass,)
     queryset = Movie.objects.all()
     serializer_class = MovieModelSerializer
 
+
 class MovieRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    #permission_classes = (IsAuthenticated, GlobalDefaultPermissionClass,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissionClass,)
     queryset = Movie.objects.all()
     serializer_class = MovieModelSerializer
+
 
 class MovieStatsView(views.APIView):
     permission_classes = (IsAuthenticated, GlobalDefaultPermissionClass,)
     queryset = Movie.objects.all()
 
-
     def get(self, request):
-        print('Passou Aqui pelo menos')
         total_movies = self.queryset.count()
         movies_by_genre = self.queryset.values('genre__name').annotate(count=Count('id'))
         total_reviews = Review.objects.count()
@@ -35,4 +35,4 @@ class MovieStatsView(views.APIView):
                 'movies_by_genre': movies_by_genre,
                 'total_reviews': total_reviews,
                 'average_stars': average_stars,
-            },status=status.HTTP_200_OK)
+            }, status=status.HTTP_200_OK)
