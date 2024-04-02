@@ -2,6 +2,8 @@ from django.db.models import Avg
 from rest_framework import serializers
 from movies.models import Movie
 from genres.models import Genre
+from genres.serializers import GenreSerializer
+from actors.serializers import ActorSerializer
 from actors.models import Actor
 
 
@@ -18,17 +20,10 @@ class MovieSerializer(serializers.Serializer):
 
 
 class MovieModelSerializer(serializers.ModelSerializer):
-    rate = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Movie
         fields = '__all__'
-
-# esse metodo precisa ter get_ como prefixo para poder implementar o campo de serliazerMethodField, pois esse é um campo calculado
-    def get_rate(self, obj):
-        rate = obj.reviews.aggregate(Avg('stars'))['stars__avg']
-        if rate:
-            return round(rate, 1)
 
 # Validação de campos sempre começam com validate_[nome do campo]
 # pode ter mais de uma validação por campo, pois retorna uma lista de validações
@@ -41,3 +36,23 @@ class MovieModelSerializer(serializers.ModelSerializer):
         if len(value) > 500:
             raise serializers.ValidationError('Resumo não deve ser maior do que 500 caracteres.')
         return value
+
+
+class MovieListDetailSerializer(serializers.Serializer):
+    rate = serializers.SerializerMethodField(read_only=True)
+    genre = GenreSerializer()
+    actors = ActorSerializer(many=True)
+
+    class Meta:
+        model = Movie
+        fields = ['id', 'title', 'genre', 'actors', 'release_date', 'rate', 'resume']
+
+# esse metodo precisa ter get_ como prefixo para poder implementar o campo de serliazerMethodField, pois esse é um campo calculado
+    def get_rate(self, obj):
+
+        rate = obj.reviews.aggregate(Avg('stars'))['stars__avg']
+
+        if rate:
+            return round(rate, 1)
+
+        return None
